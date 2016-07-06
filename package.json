@@ -1,0 +1,22 @@
+{
+  "name": "ua-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.4.1",
+    "ramda": "^0.21.0",
+    "request": "^2.72.0",
+    "xml2js": "^0.4.17",
+    "xml2json": "^0.9.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.0.1",
+    "eslint-config-airbnb": "^9.0.1"
+  }
+}
