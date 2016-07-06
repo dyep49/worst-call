@@ -1,15 +1,17 @@
-const R = require('ramda');
-const xmlParser = require('xml2json');
-const bluebird = require('bluebird');
-const request = bluebird.promisify(require('request'));
+import R from 'ramda';
+import leftPad from 'left-pad';
+import xmlParser from 'xml2json';
+import Promise from 'bluebird';
+import req from 'request';
+const request = Promise.promisify(req);
+
+import gameEndpointsByDate from './generate-endpoints';
 
 const url = 'http://gd2.mlb.com/components/game/mlb/year_2016/month_06/day_06/gid_2016_06_06_anamlb_nyamlb_1/inning/inning_all.xml';
 
 function xmlResponseToJSON(response) {
-  return xmlParser(response.body);
+  return xmlParser.toJson(response.body, {object: true, coerce: true});
 }
-
-request(url).then(parseData);
 
 function getAtBatPitches(atbat) {
   return R.prop('pitch', atbat);
@@ -37,15 +39,15 @@ function getCalledStrikes(game) {
 
 function widthStrike(pitch) {
   const halfPlateWidth = 0.7083;
-  return Math.abs(pitch.px) > halfPlateWidth;
+  return Math.abs(pitch.px) < halfPlateWidth
 }
 
 function heightStrike(pitch) {
-  (pitch.pz < pitch.sz_top) && (pitch.pz > pitch.sz_bot);
+  return (pitch.pz < pitch.sz_top) && (pitch.pz > pitch.sz_bot)
 }
 
-function notStrike(pitch) {
-  return heightStrike(pitch) || widthStrike(pitch)
+function isStrike(pitch) {
+  return heightStrike(pitch) && widthStrike(pitch)
 }
 
 function widthMiss(pitch) {
@@ -65,27 +67,32 @@ function distanceFormula(a, b) {
 function distanceMissed(pitch) {
   const widthDistMiss = widthMiss(pitch);
   const heightDistMiss = heightMiss(pitch);
-  debugger;
   return distanceFormula(widthDistMiss, heightDistMiss);
 }
 
 function printWorstCall(pitch) {
+	console.log(pitch);
   const inchesMissed = distanceMissed(pitch) * 12;
   console.log(`The worst call missed by: ${inchesMissed} inches`);
 }
 
-function parseData(response) {
-  const game = xmlParser.toJson(response.body, {object: true, coerce: true});
-  const calledStrikes = getCalledStrikes(game);
-  const incorrectCalls = R.filter(notStrike, calledStrikes);
-
-  const worstCall = incorrectCalls.reduce( (prev, next) => {
-    return distanceMissed(next) > distanceMissed(prev) ? next : prev
-  });
-
-  printWorstCall(worstCall);
-
-
-  // const worstCall = R.reduce(R.maxBy(distanceMissed), 0, incorrectCalls);
-  // const worstCall = R.map(distanceMissed, incorrectCalls);
+function maxByMiss(pitchOne, pitchTwo) {
+	return distanceMissed(pitchTwo) > distanceMissed(pitchOne) ? pitchTwo : pitchOne
 }
+
+function incorrectCalls(game) {
+  const calledStrikes = getCalledStrikes(game);
+  return R.reject(isStrike, calledStrikes);
+}
+
+export default async function worstCall(date) {
+	const gameEndpoints = await gameEndpointsByDate(date);
+	const promises = gameEndpoints.map( endpoint => request(endpoint) );
+	const games = await Promise.all(promises);
+	const parsedGames = games.map( (game, idx) => {
+			return xmlResponseToJSON(game)
+	})
+	const incorrect = R.flatten(R.map(incorrectCalls, parsedGames));
+	printWorstCall(incorrect.reduce(maxByMiss));
+}
+
