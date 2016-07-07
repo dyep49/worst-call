@@ -7,7 +7,7 @@ import worstCallByDateString from './lib/worst-call.js';
 program
   .version(pkg.version)
   .description(pkg.description)
-  .usage('command -d [day]-[month]-[year]');
+  .usage('command -D [day]-[month]-[year]');
 
 
 program
@@ -18,7 +18,7 @@ program.on('--help', () => {
   console.log(' Example:');
   console.log(' ');
   console.log('     To find the worst call on July 4, 2016');
-  console.log('     $ worst-call -d 7-4-2016');
+  console.log('     $ worst-call -D 7-4-2016');
 })
 
 if(program.date) {
