@@ -5,9 +5,9 @@
   },
   "rules": {
     "strict": 0,
-		"semi": ["error", "always"],
+    "semi": ["error", "always"],
   },
-	"parser": "babel-eslint",
+  "parser": "babel-eslint",
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module",
