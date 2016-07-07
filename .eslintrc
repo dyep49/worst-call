@@ -5,12 +5,8 @@
     "node": true
   },
   "rules": {
-    "arrow-body-style": 0,
     "strict": 0
   },
-  "plugins": [
-    "react"
-  ],
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module",
@@ -18,5 +14,5 @@
       "impliedStrict": true
     }
   },
-  "extends": ["airbnb", "eslint:recommended"],
+  "extends": ["airbnb-base", "eslint:recommended"],
 }

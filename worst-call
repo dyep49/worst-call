@@ -1,0 +1,29 @@
+#!/usr/bin/env babel-node
+
+import program from 'commander';
+import pkg from './package';
+import worstCallByDateString from './lib/worst-call.js';
+
+program
+  .version(pkg.version)
+  .description(pkg.description)
+  .usage('command -d [day]-[month]-[year]');
+
+
+program
+  .option('-D, --date [day-month-year]', 'Date to find worst call [day]-[month]-[year]')
+  .parse(process.argv);
+
+program.on('--help', () => {
+  console.log(' Example:');
+  console.log(' ');
+  console.log('     To find the worst call on July 4, 2016');
+  console.log('     $ worst-call -d 7-4-2016');
+})
+
+if(program.date) {
+  worstCallByDateString(program.date);
+} else {
+  program.outputHelp();
+  process.exit(1);
+}
